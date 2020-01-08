@@ -15,15 +15,6 @@ class IntcodeRunner:
         self.c = 0
         self.exit = False
 
-    def copy(self):
-        r = IntcodeRunner(self.program, self.program_input_generator)
-
-        r.relative_base = self.relative_base
-        r.c = self.c
-        r.exit = self.exit
-
-        return r
-
     def opcode(self):
         return self.program[self.c] % 100
 
@@ -117,56 +108,58 @@ def get_grid(data):
     program_input = []
     program = IntcodeRunner(data, iter(program_input))
 
-    state_free = 0
-    state_wall = 1
-
     output_moved = 1
     output_goal = 2
 
-    grid = {}
     start = (0, 0)
     goal = None
+    grid = {start}
 
-    open_set = [(start, program, None)]
-    visited = set()
-    while open_set:
-        current = open_set.pop()
+    discovered = {start}
+    came_from = {}
 
-        location, p, p_output_state = current
+    location = start
+    while True:
+        neighbors = (
+            ((location[0], location[1] - 1), 1, 2),
+            ((location[0], location[1] + 1), 2, 1),
+            ((location[0] - 1, location[1]), 3, 4),
+            ((location[0] + 1, location[1]), 4, 3)
+        )
 
-        if p_output_state == output_goal:
-            grid[location] = state_free
-            goal = location
-        elif p_output_state == output_moved:
-            grid[location] = state_free
-        else:
-            grid[location] = state_wall
+        has_changed_location = False
+        for n_location, n_p_input, n_r_p_input in neighbors:
+            if n_location in discovered:
+                continue
 
-        neighbors = [
-            ((location[0], location[1] - 1), 1),
-            ((location[0], location[1] + 1), 2),
-            ((location[0] - 1, location[1]), 3),
-            ((location[0] + 1, location[1]), 4)
-        ]
-
-        for n_location, n_p_input in neighbors:
-            n_p = p.copy()
+            discovered.add(n_location)
 
             program_input.append(n_p_input)
-            n_p_output_state = n_p.run()
+            n_p_output_state = program.run()
+
+            if n_p_output_state == output_goal:
+                goal = n_location
 
             if n_p_output_state == output_moved or n_p_output_state == output_goal:
-                if n_location not in visited:
-                    visited.add(n_location)
-                    open_set.append((n_location, n_p, n_p_output_state))
+                grid.add(n_location)
+                came_from[n_location] = (location, n_r_p_input)
+                location = n_location
+                has_changed_location = True
+                break
 
-    return start, goal, grid
+        if not has_changed_location:
+            if location == start:
+                return start, goal, grid
+
+            location, n_r_p_input = came_from[location]
+            program_input.append(n_r_p_input)
+            program.run()
 
 
 def get_valid_neighbors(grid, location):
     x, y = location
     neighbors = [(x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)]
-    return [n for n in neighbors if n in grid and grid[n] == 0]
+    return [n for n in neighbors if n in grid]
 
 
 def solve_a(data):
