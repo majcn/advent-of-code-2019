@@ -10,27 +10,10 @@ def parse_data():
 
 
 def angle(x1, y1, x2, y2):
-    cx = x2 - x1
-    cy = y2 - y1
-    acx = abs(cx)
-    acy = abs(cy)
-
-    if cx == 0 and cy > 0:
-        return 0
-    if cx == 0 and cy < 0:
-        return 180
-    if cx > 0 and cy == 0:
-        return 90
-    if cx < 0 and cy == 0:
-        return 270
-    if cx > 0 and cy > 0:
-        return 90 - math.degrees(math.atan(acy / acx))
-    if cx > 0 and cy < 0:
-        return 90 + math.degrees(math.atan(acy / acx))
-    if cx < 0 and cy < 0:
-        return 270 - math.degrees(math.atan(acy / acx))
-    if cx < 0 and cy > 0:
-        return 270 + math.degrees(math.atan(acy / acx))
+    r = math.atan2(x2 - x1, y2 - y1)
+    if r < 0:
+        r += math.pi * 2
+    return r
 
 
 def best_location(data):
