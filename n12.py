@@ -1,6 +1,5 @@
 from aocd import data as input_data
 from itertools import permutations
-import operator
 import math
 import re
 
