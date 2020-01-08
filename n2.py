@@ -41,8 +41,6 @@ class IntcodeRunner:
             eval('self.f' + str(oc) + '()')
             self.c += 1
 
-        return self.program
-
 
 def parse_data():
     return [int(x) for x in input_data.split(',')]
@@ -53,7 +51,8 @@ def solve_a(data):
     p.program[1] = 12
     p.program[2] = 2
 
-    return p.run()[0]
+    p.run()
+    return p.program[0]
 
 
 def solve_b(data):
@@ -62,7 +61,8 @@ def solve_b(data):
             p = IntcodeRunner(data)
             p.program[1] = noun
             p.program[2] = verb
-            if p.run()[0] == 19690720:
+            p.run()
+            if p.program[0] == 19690720:
                 return 100 * noun + verb
 
 
