@@ -98,20 +98,20 @@ def neighbors_b(grid, outer_portals, inner_portals, location):
 
 
 def shortest_path(start, neighbors_f, goal_f):
-    open_set = deque([start])
-    score_map = {start: 0}
+    queue = deque([(0, start)])
+    discovered = set()
 
-    while open_set:
-        current = open_set.popleft()
+    while queue:
+        cost, current = queue.popleft()
 
         if goal_f(current):
-            return score_map[current]
+            return cost
 
-        for cost, neighbor in neighbors_f(current):
-            tentative_score = score_map[current] + cost
-            if neighbor not in score_map or tentative_score < score_map[neighbor]:
-                score_map[neighbor] = tentative_score
-                open_set.append(neighbor)
+        for n_cost, neighbor in neighbors_f(current):
+            if neighbor in discovered:
+                continue
+            discovered.add(neighbor)
+            queue.append((cost + n_cost, neighbor))
 
 
 def solve_a(data):
