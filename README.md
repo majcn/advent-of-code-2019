@@ -1,6 +1,6 @@
 # Advent of Code 2019
 
-python solutions of advent of code [2019] → https://adventofcode.com/2019
+Advent of Code 2019 Solutions in Python → https://adventofcode.com/2019
 
 ## Requirements
 
