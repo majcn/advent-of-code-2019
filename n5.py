@@ -95,11 +95,7 @@ def parse_data():
 
 
 def solve_a(data):
-    def program_input_generator():
-        while True:
-            yield 2
-
-    p = IntcodeRunner(data, program_input_generator())
+    p = IntcodeRunner(data, iter([2]))
     while True:
         r = p.run()
         if r > 0:
@@ -107,11 +103,7 @@ def solve_a(data):
 
 
 def solve_b(data):
-    def program_input_generator():
-        while True:
-            yield 5
-
-    return IntcodeRunner(data, program_input_generator()).run()
+    return IntcodeRunner(data, iter([5])).run()
 
 
 print("Part 1: {}".format(solve_a(parse_data())))
