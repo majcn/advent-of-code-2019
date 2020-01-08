@@ -114,21 +114,23 @@ def solve_a(data):
 
 
 def solve_b(data):
-    program = IntcodeRunner(data, None)
-    program.program[0] = 2
-
     ball_x = 0
     paddle_x = 0
+
+    def program_input_generator():
+        while True:
+            if paddle_x > ball_x:
+                yield -1
+            elif paddle_x == ball_x:
+                yield 0
+            else:
+                yield 1
+
+    program = IntcodeRunner(data, program_input_generator())
+    program.program[0] = 2
+
     score = 0
     while True:
-        if paddle_x > ball_x:
-            i = -1
-        elif paddle_x == ball_x:
-            i = 0
-        else:
-            i = 1
-
-        program.program_input_generator = iter([i])
         x, y, tile_id = program.run(), program.run(), program.run()
         if program.exit:
             return score
