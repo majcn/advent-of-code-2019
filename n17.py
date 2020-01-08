@@ -106,12 +106,9 @@ def parse_data():
 def get_grid(data):
     program = IntcodeRunner(data, None)
 
-    state_scaffold = 0
-    state_open_space = 1
-
     start = None
 
-    grid = {}
+    grid = set()
     x = 0
     y = 0
     while True:
@@ -122,14 +119,13 @@ def get_grid(data):
 
         c = chr(o)
         if c == '.':
-            grid[(x, y)] = state_open_space
             x += 1
         elif c == '#':
-            grid[(x, y)] = state_scaffold
+            grid.add((x, y))
             x += 1
         elif c == '^':
             start = (x, y)
-            grid[(x, y)] = state_scaffold
+            grid.add((x, y))
             x += 1
         elif c == '\n':
             x = 0
@@ -139,8 +135,6 @@ def get_grid(data):
 
 
 def get_path(start, grid):
-    state_scaffold = 0
-
     next_direction = {
         (0, 0): 3,
         (0, 1): 1,
@@ -165,7 +159,7 @@ def get_path(start, grid):
     counter = 0
     while True:
         n_location = next_location[direction](*location)
-        if n_location in grid and grid[n_location] == state_scaffold:
+        if n_location in grid:
             counter += 1
             location = n_location
         else:
@@ -175,7 +169,7 @@ def get_path(start, grid):
             # check left
             n_direction_l = next_direction[direction, 0]
             n_location_l = next_location[n_direction_l](*location)
-            if n_location_l in grid and grid[n_location_l] == state_scaffold:
+            if n_location_l in grid:
                 n_location = n_location_l
                 n_direction = n_direction_l
                 result += str(counter) + ",L,"
@@ -183,13 +177,14 @@ def get_path(start, grid):
             # check right
             n_direction_r = next_direction[direction, 1]
             n_location_r = next_location[n_direction_r](*location)
-            if n_location_r in grid and grid[n_location_r] == state_scaffold:
+            if n_location_r in grid:
                 n_location = n_location_r
                 n_direction = n_direction_r
                 result += str(counter) + ",R,"
 
             if not n_location:
-                return result + str(counter)
+                result += str(counter)
+                return result[2:]
 
             location = n_location
             direction = n_direction
@@ -197,14 +192,13 @@ def get_path(start, grid):
 
 
 def solve_a(data):
-    state_scaffold = 0
     start, grid = get_grid(data)
 
     result = 0
     for x, y in grid:
         is_intersection = True
         for l in [(x, y), (x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]:
-            if l in grid and grid[l] == state_scaffold:
+            if l not in grid:
                 is_intersection = False
                 break
         if is_intersection:
