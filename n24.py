@@ -2,12 +2,12 @@ from aocd import data as input_data
 
 
 def parse_data():
-    return {(x, y, 0) for y, line in enumerate(input_data.split('\n')) for x, c in enumerate(line) if c == '#'}
+    return {(x, y) for y, line in enumerate(input_data.split('\n')) for x, c in enumerate(line) if c == '#'}
 
 
 def neighbours_a(l):
-    x, y, z = l
-    neighbours = (x + 1, y, 0), (x - 1, y, 0), (x, y + 1, 0), (x, y - 1, 0)
+    x, y = l
+    neighbours = (x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)
 
     return (n for n in neighbours if 0 <= n[0] < 5 and 0 <= n[1] < 5)
 
@@ -119,11 +119,11 @@ def solve_a(data):
         cache.add(web)
         web = frozenset(next_web(web, neighbours_a))
 
-    return sum(pow(2, (y * 5 + x)) for x, y, z in web)
+    return sum(pow(2, (y * 5 + x)) for x, y in web)
 
 
 def solve_b(data):
-    web = data
+    web = {(d[0], d[1], 0) for d in data}
     for x in range(200):
         web = next_web(web, neighbours_b)
     return len(web)
