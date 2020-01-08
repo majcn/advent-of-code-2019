@@ -16,16 +16,22 @@ def parse_data():
                 grid.add((x, y))
             elif c == '@':
                 start = (x, y)
+                grid.add((x, y))
             elif c.isupper():
                 doors[(x, y)] = c.lower()
+                grid.add((x, y))
             elif c.islower():
                 keys[(x, y)] = c.lower()
+                grid.add((x, y))
 
-    grid.update(doors)
-    grid.update(keys)
-    grid.add(start)
+    keys_mask = defaultdict(int)
+    c = 1
+    for k in keys:
+        keys_mask[k] = c
+        keys_mask[keys[k]] = c
+        c *= 2
 
-    return start, doors, keys, grid
+    return start, doors, keys, keys_mask, grid
 
 
 def bfs(start, finish, grid):
@@ -49,7 +55,7 @@ def bfs(start, finish, grid):
                 q.append((cost + 1, neighbor))
 
 
-def get_my_grid(start, doors, keys, mask, grid):
+def get_my_grid(start, doors, keys, keys_mask, grid):
     my_grid = defaultdict(list)
     for k1, k2 in combinations(keys.keys() | set(start), 2):
         bfs_result = bfs(k1, k2, grid)
@@ -64,14 +70,14 @@ def get_my_grid(start, doors, keys, mask, grid):
         while current in came_from:
             current = came_from[current]
             if current in doors:
-                keys_needed += mask[doors[current]]
+                keys_needed += keys_mask[doors[current]]
         my_grid[k1].append((k2, cost, keys_needed))
         my_grid[k2].append((k1, cost, keys_needed))
 
     return my_grid
 
 
-def shortest_path(start, my_grid, mask, goal_f):
+def shortest_path(start, my_grid, keys_mask, goal_f):
     first_element = (start, 0)
 
     open_queue = [(0, first_element)]
@@ -90,12 +96,12 @@ def shortest_path(start, my_grid, mask, goal_f):
                 if keys_needed & my_keys != keys_needed:
                     continue
 
-                if my_keys & mask[n_location] > 0:
+                if my_keys & keys_mask[n_location] > 0:
                     continue
 
                 n_locations = list(locations)
                 n_locations[i] = n_location
-                neighbor = (tuple(n_locations), my_keys | mask[n_location])
+                neighbor = (tuple(n_locations), my_keys | keys_mask[n_location])
 
                 tentative_score = score[current] + n_cost
                 if neighbor not in score or tentative_score < score[neighbor]:
@@ -104,44 +110,30 @@ def shortest_path(start, my_grid, mask, goal_f):
 
 
 def solve_a(data):
-    start, doors, keys, grid = data
-    mask = defaultdict(int)
-    c = 1
-    for k in keys:
-        mask[k] = c
-        mask[keys[k]] = c
-        c *= 2
+    start, doors, keys, keys_mask, grid = data
 
     start = (start,)
+    goal = sum(keys_mask.values()) // 2
 
-    goal = sum(mask.values()) // 2
-
-    my_grid = get_my_grid(start, doors, keys, mask, grid)
-    return shortest_path(start, my_grid, mask, lambda x: x[1] == goal)
+    my_grid = get_my_grid(start, doors, keys, keys_mask, grid)
+    return shortest_path(start, my_grid, keys_mask, lambda c: c[1] == goal)
 
 
 def solve_b(data):
-    start, doors, keys, grid = data
+    start, doors, keys, grid, keys_mask = data
 
     x, y = start
-    start = (x - 1, y - 1), (x - 1, y + 1), (x + 1, y - 1), (x + 1, y + 1)
     grid.remove((x, y))
     grid.remove((x - 1, y))
     grid.remove((x + 1, y))
     grid.remove((x, y - 1))
     grid.remove((x, y + 1))
 
-    mask = defaultdict(int)
-    c = 1
-    for k in keys:
-        mask[k] = c
-        mask[keys[k]] = c
-        c *= 2
+    start = (x - 1, y - 1), (x - 1, y + 1), (x + 1, y - 1), (x + 1, y + 1)
+    goal = sum(keys_mask.values()) // 2
 
-    goal = sum(mask.values()) // 2
-
-    my_grid = get_my_grid(start, doors, keys, mask, grid)
-    return shortest_path(start, my_grid, mask, lambda x: x[1] == goal)
+    my_grid = get_my_grid(start, doors, keys, keys_mask, grid)
+    return shortest_path(start, my_grid, keys_mask, lambda c: c[1] == goal)
 
 
 print("Part 1: {}".format(solve_a(parse_data())))
