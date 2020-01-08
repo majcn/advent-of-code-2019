@@ -18,8 +18,6 @@ def parse_data():
 
 
 def shop(data, item_name, item_count, my_items):
-    final_result = True
-
     supply = my_items[item_name]
     if supply >= item_count:
         return True
@@ -31,17 +29,14 @@ def shop(data, item_name, item_count, my_items):
     multiplier = math.ceil((item_count - supply) / result_count)
     for r_count, r_name in requirements:
         r_needed = r_count * multiplier
-        final_result = shop(data, r_name, r_needed, my_items)
+        s_successful = shop(data, r_name, r_needed, my_items)
+        if not s_successful:
+            return False
 
-    for r_count, r_name in requirements:
-        my_items[r_name] -= (multiplier * r_count)
+        my_items[r_name] -= multiplier * r_count
+    my_items[item_name] += multiplier * result_count
 
-        # bug?
-        if (my_items[r_name]) < 0:
-            final_result = shop(data, r_name, 1, my_items)
-    my_items[item_name] += (multiplier * result_count)
-
-    return final_result
+    return True
 
 
 def solve_a(data):
