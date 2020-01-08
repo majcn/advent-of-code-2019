@@ -2,11 +2,12 @@ from aocd import data as input_data
 
 
 class IntcodeRunner:
-    def __init__(self, program, program_input_provider, program_output_supplier):
+    def __init__(self, program, program_input_generator):
         self.program = {i: p for i, p in enumerate(program)}
 
-        self.program_input_provider = program_input_provider
-        self.program_output_supplier = program_output_supplier
+        self.program_input_generator = program_input_generator
+
+        self.program_output = None
 
         self.c = 0
         self.exit = False
@@ -40,12 +41,12 @@ class IntcodeRunner:
         self.c += 3
 
     def f3(self):
-        self.set_value(1, self.program_input_provider())
+        self.set_value(1, next(self.program_input_generator))
         self.c += 1
 
     def f4(self):
         p1 = self.get_value(1)
-        self.program_output_supplier(p1)
+        self.program_output = p1
         self.c += 1
 
     def f5(self):
@@ -85,35 +86,32 @@ class IntcodeRunner:
             eval('self.f' + str(oc) + '()')
             self.c += 1
 
+            if oc == 4:
+                return self.program_output
+
 
 def parse_data():
     return [int(x) for x in input_data.split(',')]
 
 
 def solve_a(data):
-    result = [None]
+    def program_input_generator():
+        while True:
+            yield 2
 
-    def program_input_provider():
-        return 2
-
-    def program_output_supplier(x):
-        result[0] = x
-
-    IntcodeRunner(data, program_input_provider, program_output_supplier).run()
-    return result[0]
+    p = IntcodeRunner(data, program_input_generator())
+    while True:
+        r = p.run()
+        if r > 0:
+            return r
 
 
 def solve_b(data):
-    result = [None]
+    def program_input_generator():
+        while True:
+            yield 5
 
-    def program_input_provider():
-        return 5
-
-    def program_output_supplier(x):
-        result[0] = x
-
-    IntcodeRunner(data, program_input_provider, program_output_supplier).run()
-    return result[0]
+    return IntcodeRunner(data, program_input_generator()).run()
 
 
 print("Part 1: {}".format(solve_a(parse_data())))
