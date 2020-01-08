@@ -111,7 +111,7 @@ def solve_b(data):
     x = 100
     y = 100
 
-    while IntcodeRunner(data, iter([x + 99, y - 99])).run() == 0:
+    while True:
         y += 1
         while True:
             r = IntcodeRunner(data, iter([x, y])).run()
@@ -120,7 +120,8 @@ def solve_b(data):
             else:
                 break
 
-    return x * 10000 + y - 99
+        if IntcodeRunner(data, iter([x + 99, y - 99])).run() != 0:
+            return x * 10000 + y - 99
 
 
 print("Part 1: {}".format(solve_a(parse_data())))
