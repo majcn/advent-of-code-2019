@@ -120,7 +120,7 @@ def solve_a(data):
 
 
 def solve_b(data):
-    start, doors, keys, grid, keys_mask = data
+    start, doors, keys, keys_mask, grid = data
 
     x, y = start
     grid.remove((x, y))
