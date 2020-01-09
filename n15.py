@@ -170,34 +170,33 @@ def get_valid_neighbors(grid, location):
 def solve_a(data):
     start, goal, grid = get_grid(data)
 
-    open_set = deque([start])
-    score = {start: 0}
+    open_set = deque([(0, start)])
+    visited = set()
     while open_set:
-        location = open_set.popleft()
+        cost, location = open_set.popleft()
 
         if location == goal:
-            return score[location]
+            return cost
 
         for n_location in get_valid_neighbors(grid, location):
-            tentative_score = score[location] + 1
-            if n_location not in score or tentative_score < score[n_location]:
-                score[n_location] = tentative_score
-                open_set.append(n_location)
+            if n_location not in visited:
+                open_set.append((cost + 1, n_location))
+                visited.add(n_location)
 
 
 def solve_b(data):
     start, goal, grid = get_grid(data)
 
-    open_set = [(goal, 0)]
+    open_set = [(0, goal)]
     visited = set()
     max_c = 0
     while open_set:
-        location, c = open_set.pop()
-        max_c = max(max_c, c)
+        cost, location = open_set.pop()
+        max_c = max(max_c, cost)
 
         for n_location in get_valid_neighbors(grid, location):
             if n_location not in visited:
-                open_set.append((n_location, c + 1))
+                open_set.append((cost + 1, n_location))
                 visited.add(n_location)
     return max_c
 
